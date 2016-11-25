@@ -1,0 +1,259 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>dpc</title><meta name="generator" content="MATLAB 9.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-09-11"><meta name="DC.source" content="dpc.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Chiang 1.1</a></li><li><a href="#3">invoke dpc algorithm for 3 users</a></li><li><a href="#4">add one more user - update the parameters accordingly</a></li><li><a href="#5">plot</a></li><li><a href="#6">DPC ALGORITHM CORE</a></li><li><a href="#9">For debug - BEGIN</a></li></ul></div><h2>Chiang 1.1<a name="1"></a></h2><pre class="codeinput"><span class="keyword">function</span> [] = dpc()
+</pre><pre class="codeinput">targetDir = <span class="string">'C:\Users\Anuj Nayak\Desktop\SigProc4CommNet'</span>;
+
+<span class="comment">% assignment question</span>
+numUsers = 3; <span class="comment">% number of users</span>
+gamma = [1;1.5;1]; <span class="comment">% SINR requirement</span>
+gainMtx = [1.0 0.1 0.3; <span class="keyword">...</span>
+                 0.2 1.0 0.3; <span class="keyword">...</span>
+                 0.2 0.2 1.0]; <span class="comment">% channel gain matrix - assignment question</span>
+pInit = ones(numUsers,1); <span class="comment">% initial PTx</span>
+numIters = 10; <span class="comment">% number of iterations</span>
+rho = 1; <span class="comment">% inverse of processing gain</span>
+noisePwr = 0.1*ones(numUsers, 1);
+</pre><h2>invoke dpc algorithm for 3 users<a name="3"></a></h2><pre class="codeinput">[p, sinr, pArr, sinrArr] = dpc_func(gainMtx, pInit, rho, noisePwr, gamma, numIters);
+figure(1);subplot(211);plot([1:size(pArr, 2)], pArr.', <span class="string">'-o'</span>, <span class="string">'linewidth'</span>, 2);xlabel(<span class="string">'iteration number'</span>);ylabel(<span class="string">'Tx power'</span>);title(<span class="string">'DPC algorithm - 3 users'</span>);grid <span class="string">on</span>;
+legend(<span class="string">'User 1'</span>,<span class="string">'User 2'</span>,<span class="string">'User 3'</span>);xlim([1 11]);
+subplot(212);plot([1:size(sinrArr, 2)], sinrArr.', <span class="string">'-o'</span>, <span class="string">'linewidth'</span>, 2);xlabel(<span class="string">'iteration number'</span>);ylabel(<span class="string">'Rx SINR'</span>);grid <span class="string">on</span>;
+legend(<span class="string">'User 1'</span>,<span class="string">'User 2'</span>,<span class="string">'User 3'</span>);xlim([1 11]);drawnow();
+print([targetDir <span class="string">'\dpc_3_user_scenario'</span>], <span class="string">'-dpng'</span>)
+
+pArrFirst3Users = pArr;
+sinrArrFirst3Users = sinrArr;
+</pre><img vspace="5" hspace="5" src="dpc_01.png" style="width:560px;height:420px;" alt=""> <h2>add one more user - update the parameters accordingly<a name="4"></a></h2><pre class="codeinput">numUsers = 4; <span class="comment">% number of users</span>
+gamma = [1;1.5;1;1]; <span class="comment">% SINR requirement</span>
+gainMtx = [1.0  0.1  0.3  0.1; <span class="keyword">...</span>
+                 0.2  1.0  0.3  0.1; <span class="keyword">...</span>
+                 0.2  0.2  1.0  0.1; <span class="keyword">...</span>
+                 0.1  0.1  0.1  1]; <span class="comment">% channel gain matrix - assignment question</span>
+pInit = [p;1]; <span class="comment">% initial PTx in milliWatts</span>
+numIters = 10; <span class="comment">% number of iterations</span>
+noisePwr = 0.1*ones(numUsers, 1);
+<span class="comment">% invoke dpc algorithm for 4 users</span>
+[p, sinr, pArr, sinrArr] = dpc_func(gainMtx, pInit, rho, noisePwr, gamma, numIters);
+figure(2); subplot(211); plot([1:size(pArr, 2)], pArr.', <span class="string">'-x'</span>, <span class="string">'linewidth'</span>, 2); xlabel(<span class="string">'iteration number'</span>);ylabel(<span class="string">'Tx power'</span>);title(<span class="string">'DPC algorithm - 4 users'</span>);grid <span class="string">on</span>;
+legend(<span class="string">'User 1'</span>,<span class="string">'User 2'</span>,<span class="string">'User 3'</span>,<span class="string">'User 4'</span>);xlim([1 11]);
+subplot(212); plot([1:size(pArr, 2)], pArr.', <span class="string">'-x'</span>, <span class="string">'linewidth'</span>, 2); xlabel(<span class="string">'iteration number'</span>); ylabel(<span class="string">'Rx SINR'</span>); grid <span class="string">on</span>;
+legend(<span class="string">'User 1'</span>,<span class="string">'User 2'</span>,<span class="string">'User 3'</span>,<span class="string">'User 4'</span>);xlim([1 11]);drawnow();
+print([targetDir <span class="string">'\dpc_4_user_scenario'</span>], <span class="string">'-dpng'</span>)
+</pre><img vspace="5" hspace="5" src="dpc_02.png" style="width:560px;height:420px;" alt=""> <h2>plot<a name="5"></a></h2><p>clubbing 3 and 4 users' scenario together</p><pre class="codeinput">pArrAllUsers = [[pArrFirst3Users;inf(1, size(pArrFirst3Users, 2))] pArr];
+sinrArrAllUsers = [[sinrArrFirst3Users;inf(1, size(sinrArrFirst3Users, 2))] sinrArr];
+figure(3); title(<span class="string">'DPC algorithm - 20 iterations (3 and 4 users)'</span>);
+subplot(211); plot(pArrAllUsers.', <span class="string">'-^'</span>, <span class="string">'linewidth'</span>, 2); xlabel(<span class="string">'iteration number'</span>); ylabel(<span class="string">'Tx power'</span>);title(<span class="string">'DPC algorithm - 3 and 4 users'</span>);grid <span class="string">on</span>;
+legend(<span class="string">'User 1'</span>,<span class="string">'User 2'</span>,<span class="string">'User 3'</span>,<span class="string">'User 4'</span>);xlim([1 22]);
+subplot(212); plot(sinrArrAllUsers.', <span class="string">'-^'</span>, <span class="string">'linewidth'</span>, 2); xlabel(<span class="string">'iteration number'</span>); ylabel(<span class="string">'Rx SINR'</span>); grid <span class="string">on</span>;
+legend(<span class="string">'User 1'</span>,<span class="string">'User 2'</span>,<span class="string">'User 3'</span>,<span class="string">'User 4'</span>);xlim([1 22]);drawnow();
+print([targetDir <span class="string">'\dpc_3_and_4_user_scenario'</span>], <span class="string">'-dpng'</span>)
+</pre><h2>DPC ALGORITHM CORE<a name="6"></a></h2><pre class="codeinput"><span class="keyword">function</span> [p, sinr, pArr, sinrArr] = dpc_func(gainMtx, pInit, rho, noisePwr, gamma, numIters)
+</pre><pre class="codeinput">pInvMethodEnable = 0;
+p = pInit;
+sinr = (diag(diag(gainMtx))*p)./((gainMtx-diag(diag(gainMtx)))*p*rho + noisePwr);
+sinrArr = sinr; pArr = p;
+
+<span class="comment">% loop for numIters iterations</span>
+<span class="keyword">for</span> iterLoop = 1:numIters
+    p = gamma./sinr.*p;
+    sinr = (diag(diag(gainMtx))*p)./((gainMtx-diag(diag(gainMtx)))*p*rho + noisePwr);
+    sinrArr = [sinrArr sinr];
+    pArr = [pArr p];
+<span class="keyword">end</span>
+
+<span class="comment">% verifying the code with Matrix inversion method</span>
+DMtx = diag(gamma);
+FMtx = [gainMtx - diag(diag(gainMtx))].*((ones(size(gainMtx, 1), 1)./diag(gainMtx))*ones(1,size(gainMtx, 2)));
+uMtx = gamma.*noisePwr./diag(gainMtx);
+
+<span class="keyword">if</span> pInvMethodEnable == 1
+    pInvMethod = inv(eye(size(gainMtx, 1)) - DMtx*FMtx)*uMtx;
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="dpc_03.png" style="width:560px;height:420px;" alt=""> <h2>For debug - BEGIN<a name="9"></a></h2><pre class="codeinput"><span class="comment">% %% example question for debug - overriding the assignment question</span>
+<span class="comment">% numUsers = 4; % number of users</span>
+<span class="comment">% gamma = [2;2.5;1.5;2]; % SINR requirement</span>
+<span class="comment">% gainMtx = [1 0.1 0.2 0.3; ...</span>
+<span class="comment">%            0.2 1 0.1 0.1; ...</span>
+<span class="comment">%            0.2 0.1 1 0.1; ...</span>
+<span class="comment">%            0.1 0.1 0.1 1]; % channel gain matrix - assignment question</span>
+<span class="comment">% pInit = ones(numUsers,1); % initial PTx</span>
+<span class="comment">%</span>
+<span class="comment">% numIters = 20; % number of iterations</span>
+<span class="comment">% rho = 1; % inverse of processing gain</span>
+<span class="comment">% noisePwr = 0.1*ones(numUsers, 1);</span>
+
+<span class="comment">% For debug - END</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Chiang 1.1
+function [] = dpc()
+
+targetDir = 'C:\Users\Anuj Nayak\Desktop\SigProc4CommNet';
+
+% assignment question
+numUsers = 3; % number of users
+gamma = [1;1.5;1]; % SINR requirement
+gainMtx = [1.0 0.1 0.3; ...
+                 0.2 1.0 0.3; ...
+                 0.2 0.2 1.0]; % channel gain matrix - assignment question
+pInit = ones(numUsers,1); % initial PTx
+numIters = 10; % number of iterations
+rho = 1; % inverse of processing gain
+noisePwr = 0.1*ones(numUsers, 1);
+
+%% invoke dpc algorithm for 3 users
+[p, sinr, pArr, sinrArr] = dpc_func(gainMtx, pInit, rho, noisePwr, gamma, numIters);
+figure(1);subplot(211);plot([1:size(pArr, 2)], pArr.', '-o', 'linewidth', 2);xlabel('iteration number');ylabel('Tx power');title('DPC algorithm - 3 users');grid on;
+legend('User 1','User 2','User 3');xlim([1 11]);
+subplot(212);plot([1:size(sinrArr, 2)], sinrArr.', '-o', 'linewidth', 2);xlabel('iteration number');ylabel('Rx SINR');grid on;
+legend('User 1','User 2','User 3');xlim([1 11]);drawnow();
+print([targetDir '\dpc_3_user_scenario'], '-dpng')
+
+pArrFirst3Users = pArr;
+sinrArrFirst3Users = sinrArr;
+
+%% add one more user - update the parameters accordingly
+numUsers = 4; % number of users
+gamma = [1;1.5;1;1]; % SINR requirement
+gainMtx = [1.0  0.1  0.3  0.1; ...
+                 0.2  1.0  0.3  0.1; ...
+                 0.2  0.2  1.0  0.1; ...
+                 0.1  0.1  0.1  1]; % channel gain matrix - assignment question
+pInit = [p;1]; % initial PTx in milliWatts
+numIters = 10; % number of iterations
+noisePwr = 0.1*ones(numUsers, 1);
+% invoke dpc algorithm for 4 users
+[p, sinr, pArr, sinrArr] = dpc_func(gainMtx, pInit, rho, noisePwr, gamma, numIters);
+figure(2); subplot(211); plot([1:size(pArr, 2)], pArr.', '-x', 'linewidth', 2); xlabel('iteration number');ylabel('Tx power');title('DPC algorithm - 4 users');grid on;
+legend('User 1','User 2','User 3','User 4');xlim([1 11]);
+subplot(212); plot([1:size(pArr, 2)], pArr.', '-x', 'linewidth', 2); xlabel('iteration number'); ylabel('Rx SINR'); grid on;
+legend('User 1','User 2','User 3','User 4');xlim([1 11]);drawnow();
+print([targetDir '\dpc_4_user_scenario'], '-dpng')
+
+
+%% plot
+% clubbing 3 and 4 users' scenario together
+pArrAllUsers = [[pArrFirst3Users;inf(1, size(pArrFirst3Users, 2))] pArr];
+sinrArrAllUsers = [[sinrArrFirst3Users;inf(1, size(sinrArrFirst3Users, 2))] sinrArr];
+figure(3); title('DPC algorithm - 20 iterations (3 and 4 users)');
+subplot(211); plot(pArrAllUsers.', '-^', 'linewidth', 2); xlabel('iteration number'); ylabel('Tx power');title('DPC algorithm - 3 and 4 users');grid on;
+legend('User 1','User 2','User 3','User 4');xlim([1 22]);
+subplot(212); plot(sinrArrAllUsers.', '-^', 'linewidth', 2); xlabel('iteration number'); ylabel('Rx SINR'); grid on;
+legend('User 1','User 2','User 3','User 4');xlim([1 22]);drawnow();
+print([targetDir '\dpc_3_and_4_user_scenario'], '-dpng')
+
+
+%% DPC ALGORITHM CORE
+function [p, sinr, pArr, sinrArr] = dpc_func(gainMtx, pInit, rho, noisePwr, gamma, numIters)
+
+pInvMethodEnable = 0;
+p = pInit;
+sinr = (diag(diag(gainMtx))*p)./((gainMtx-diag(diag(gainMtx)))*p*rho + noisePwr);
+sinrArr = sinr; pArr = p;
+
+% loop for numIters iterations
+for iterLoop = 1:numIters
+    p = gamma./sinr.*p;
+    sinr = (diag(diag(gainMtx))*p)./((gainMtx-diag(diag(gainMtx)))*p*rho + noisePwr);
+    sinrArr = [sinrArr sinr];
+    pArr = [pArr p];
+end
+
+% verifying the code with Matrix inversion method
+DMtx = diag(gamma);
+FMtx = [gainMtx - diag(diag(gainMtx))].*((ones(size(gainMtx, 1), 1)./diag(gainMtx))*ones(1,size(gainMtx, 2)));
+uMtx = gamma.*noisePwr./diag(gainMtx);
+
+if pInvMethodEnable == 1
+    pInvMethod = inv(eye(size(gainMtx, 1)) - DMtx*FMtx)*uMtx;
+end
+
+%% For debug - BEGIN
+
+% %% example question for debug - overriding the assignment question
+% numUsers = 4; % number of users
+% gamma = [2;2.5;1.5;2]; % SINR requirement
+% gainMtx = [1 0.1 0.2 0.3; ...
+%            0.2 1 0.1 0.1; ...
+%            0.2 0.1 1 0.1; ...
+%            0.1 0.1 0.1 1]; % channel gain matrix - assignment question
+% pInit = ones(numUsers,1); % initial PTx
+%
+% numIters = 20; % number of iterations
+% rho = 1; % inverse of processing gain
+% noisePwr = 0.1*ones(numUsers, 1);
+
+% For debug - END
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,19 @@
+[yVec, m_abVec, n_abVec] = get_observation_vec_aposteriori(W, classLabelList)
+
+numClasses = length(classLabelList);
+
+for indClassRow = 1:numClasses
+    nodeIndicesRow = find(classLabelList == indClassRow);
+    for indClassCol = 1:numClasses
+        nodeIndicesCol = find(classLabelList == indClassCol);
+        edgeMat = W(nodeIndicesRow, nodeIndicesCol);
+        m_abMat(indClassRow, indClassCol) = sum(sum(edgeMat));
+        n_abMat(indClassRow, indClassCol) = size(edgeMat, 1)*size(edgeMat, 2);
+        yMat(indClassRow, indClassCol) = m_abMat(indClassRow, indClassCol)/n_abMat(indClassRow, indClassCol);
+    end
+end
+
+m_abVec = reshape(m_abMat, [], 1);
+m_abVec = reshape(n_abMat, [], 1);
+
+

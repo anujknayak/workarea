@@ -1,0 +1,70 @@
+%function [psiEst_t] = get_aposteriori_blkmodel(W, Params)
+
+% >>>> FOR DEBUG BEGIN <<<<
+numSnapShots = 1e3;
+[synNet] = synthetic_blkmodel_gen_params_init();
+dbg = [];
+[~, W, psiVec_t, classSizeList, classMemNodeMap, dbg] = synthetic_blkmodel_gen(numSnapShots, synNet, dbg);
+Params.vCovMtx = dbg.vCovMtx;
+Params.vCovMtx0 = dbg.vCovMtx0;
+Params.numClasses = synNet.numClasses;
+Params.muZero = synNet.muZero;
+% >>>> FOR DEBUG END <<<<
+
+numClasses = Params.numClasses;
+classListAll = [1:numClasses];
+numNodes = size(W, 1);
+
+% initialize class membership - spectral clustering
+[c_0] = spectral_clustering(W(:,:,1), numClasses);
+
+[c_0Sorted, c_0SortIndices] = sort(c_0, 'ascend');
+
+% reorder adjacency matrix
+WSorted = W(c_0SortIndices, :, 1);
+WSorted = W(:, c_0SortIndices, 1);
+
+% get the classes that exist in the current snapshot
+[classExistList, classSizesIndic] = unique(c_0Sorted);
+% taking care of the missing classes at the current snapshot
+classAbsentList = classListAll(~ismember((1:numClasses), classExistList));
+% number of current classes might be less than or equal to the init value
+numClassesCurrent = length(classSizesIndic);
+% 1 x numClasses vector with the class size assigned at the corresponding indices
+classSizes = zeros(numClasses, 1);
+% determine the class sizes for the existing class labels
+classSizes(classExistList) = diff([classSizesIndic;numNodes+1]);
+classSizeList = classSizes;
+
+% compute block densities Y^t
+[yVec, m_abVec, n_abVec] = get_observation_vec_apriori(WSorted, classSizeList);
+
+% compute EKF equations
+FMat = eye(size(classSizeList,1)^2);
+ekfParams.GammaMat = Params.vCovMtx;
+ekfParams.GammaMatZero = Params.vCovMtx0;
+ekfParams.muZeroVals = Params.muZero;
+[psiEst_t] = extended_kalman_filt_apriori_blkmodel(yVec, FMat, classSizeList, ekfParams);
+
+% computing posterior probability
+% factor 1
+pt_fact1 = m_abVec(:,1)*log(sigmoid_fun(psiEst_t(:,1))) + (n_abVec(:,1) - m_abVec(:,1)).*log(1-sigmoid_fun(psiEst_t(:,1)));
+% computing muZeroVec - consider determing this hyperparameter [TODO]
+muZeroVals = ekfParams.muZeroVals;muZeroMat = muZeroVals(2)*ones(numClasses); muZeroMat([1:numClasses:numClasses^2]+[0:1:numClasses-1]) = muZeroVals(1)*ones(1,numClasses);
+muZeroVec = reshape(muZeroMat, [], 1);
+psiEstInit = mvnrnd(muZeroVec, ekfParams.GammaMat, 1).';
+REstInit = FMat*ekfParams.GammaMatZero*FMat.' + GammaMat;
+% factor 2
+pt_fact2 = -1/2*(psiEst-psiEstInit)*inv(REstInit)*(psiEst-psiEstInit);
+% posterior probability
+pt = pt_fact1 + pt_fact2;
+
+%figure(1);imagesc(WSorted);
+%figure(2);imagesc(W(:,:,1))
+% compute log posterior
+
+
+
+
+
+
