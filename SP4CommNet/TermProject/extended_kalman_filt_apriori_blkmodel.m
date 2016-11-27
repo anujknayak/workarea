@@ -4,19 +4,19 @@
 %         ekfParams : 
 % outputs: stateEst: estimated state
 %
-function [psiEst_t] = extended_kalman_filt_apriori_blkmodel(yVec, n_abVec, F, classLabelList, numClasses, ekfParams)
+function [psiEst_t, yVec] = extended_kalman_filt_apriori_blkmodel(yVec, n_abVec, F, classLabelList, numClasses, ekfParams)
 % %dbstop if warning
 % % >>>> for debug begin <<<<
 % numSnapShots = 1e3;
 % [synNet] = synthetic_blkmodel_gen_params_init();
 % dbg = [];
 % [W, psiVec_t, classLabelList, numClasses, dbg] = synthetic_blkmodel_gen(numSnapShots, synNet, dbg);
-% Params.vCovMtx = dbg.vCovMtx;
-% Params.vCovMtx0 = dbg.vCovMtx0;
+% Params.GammaMat = dbg.GammaMat;
+% Params.GammaMat0 = dbg.GammaMat0;
 % Params.muZero = synNet.muZero;
 % 
-% ekfParams.GammaMat = Params.vCovMtx;
-% ekfParams.GammaMatZero = Params.vCovMtx0;
+% ekfParams.GammaMat = Params.GammaMat;
+% ekfParams.GammaMatZero = Params.GammaMat0;
 % ekfParams.muZeroVals = Params.muZero;
 % 
 % [yVec, ~, n_abVec] = get_observation_vec_apriori(W, classLabelList, numClasses);
@@ -52,5 +52,5 @@ for indSnapShot = 1:numSnapShots
     psiEst_t(:, indSnapShot) = psiEst; % 
 end
 
-figure(10);subplot(121);plot(yVec.');subplot(122);plot(sigmoid_fun(psiEst_t.'), 'linewidth', 2); grid on;%subplot(122);plot(yVec.'-sigmoid_fun(psiEst_t.'));
+%figure(10);subplot(121);plot(yVec.');subplot(122);plot(sigmoid_fun(psiEst_t.'), 'linewidth', 2); grid on;%subplot(122);plot(yVec.'-sigmoid_fun(psiEst_t.'));
 

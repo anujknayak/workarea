@@ -1,20 +1,25 @@
 function [yVec, m_abVec, n_abVec] = get_observation_vec_aposteriori(W, classLabelList, numClasses)
 
 numSnapShots = size(W, 3);
+m_abMat = zeros(numClasses, numClasses, numSnapShots);
+n_abMat = zeros(numClasses, numClasses, numSnapShots);
+yMat = zeros(numClasses, numClasses, numSnapShots);
 
 for indSnapShot = 1:numSnapShots
     for indClassRow = 1:numClasses
         nodeIndicesRow = (classLabelList(:, indSnapShot) == indClassRow);
+        nodeIndicesRowLen = sum(nodeIndicesRow);
         for indClassCol = 1:numClasses
             nodeIndicesCol = (classLabelList(:, indSnapShot) == indClassCol);
-            edgeMat = W(nodeIndicesRow, nodeIndicesCol, indSnapShot);
-            m_abMat(indClassRow, indClassCol, indSnapShot) = sum(sum(edgeMat));
+            m_abMatCurrent = sum(sum(W(nodeIndicesRow, nodeIndicesCol, indSnapShot)));
+            m_abMat(indClassRow, indClassCol, indSnapShot) = m_abMatCurrent;
             if indClassRow == indClassCol
-                n_abMat(indClassRow, indClassCol, indSnapShot) = size(edgeMat, 1)*(size(edgeMat, 1)-1);
+               n_abMatCurrent = nodeIndicesRowLen*(nodeIndicesRowLen-1);
             else
-                n_abMat(indClassRow, indClassCol, indSnapShot) = size(edgeMat, 1)*size(edgeMat, 2);
+               n_abMatCurrent = nodeIndicesRowLen*sum(nodeIndicesCol);
             end
-            yMat(indClassRow, indClassCol, indSnapShot) = m_abMat(indClassRow, indClassCol, indSnapShot)/n_abMat(indClassRow, indClassCol, indSnapShot);
+            n_abMat(indClassRow, indClassCol, indSnapShot) = n_abMatCurrent;
+            yMat(indClassRow, indClassCol, indSnapShot) = m_abMatCurrent/n_abMatCurrent;
         end
     end
 end

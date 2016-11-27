@@ -7,12 +7,12 @@ function [psiEst_t] = extended_kalman_filt_aposteriori_blkmodel(yVec, F, n_abVec
 % [synNet] = synthetic_blkmodel_gen_params_init();
 % dbg = [];
 % [W, ~, classLabelList, numClasses, dbg] = synthetic_blkmodel_gen(numSnapShots, synNet, dbg);
-% Params.vCovMtx = dbg.vCovMtx;
-% Params.vCovMtx0 = dbg.vCovMtx0;
+% Params.GammaMat = dbg.GammaMat;
+% Params.GammaMat0 = dbg.GammaMat0;
 % Params.muZero = synNet.muZero;
 % 
-% ekfParams.GammaMat = Params.vCovMtx;
-% ekfParams.GammaMatZero = Params.vCovMtx0;
+% ekfParams.GammaMat = Params.GammaMat;
+% ekfParams.GammaMatZero = Params.GammaMat0;
 % ekfParams.muZeroVals = Params.muZero;
 % 
 % [yVec, m_abVec, n_abVec] = get_observation_vec_aposteriori(W(:,:,1), classLabelList(:,1), synNet.numClasses);

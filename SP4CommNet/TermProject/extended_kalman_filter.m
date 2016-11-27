@@ -6,7 +6,7 @@ psiEst_tMinus1 = psiEst;
 REst = FMat*REst*FMat.'+ GammaMat; % estimating the covariance matrix
 REst_tMinus1 = REst;
 HMat = diag((sigmoid_fun(psiEst).^2).*exp(-psiEst));
-KalmanGainMat = REst*HMat.'*inv(HMat*REst*HMat.'+SigMat); % computing the Kalman Gain
+KalmanGainMat = (REst*HMat.')/(HMat*REst*HMat.'+SigMat); % computing the Kalman Gain
 psiEst = psiEst + KalmanGainMat*(yVec-sigmoid_fun(psiEst)); % updating the state estimate
 REst = (eye(size(KalmanGainMat)) - KalmanGainMat*HMat)*REst; % updating the covariance matrix estimate
 

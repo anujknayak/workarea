@@ -20,11 +20,11 @@ classSizes = synNet.classSizes;
 classMemVecInit = synNet.classMemVecInit;
 classMemNodeMap = synNet.classMemNodeMap;
 classReAssignPercent = synNet.classReAssignPercent;
-vCovMtx0 = synNet.gaussEvolCovParamVecInit*eye(numClasses^2); % initialization only
+GammaMat0 = synNet.gaussEvolCovParamVecInit*eye(numClasses^2); % initialization only
 thetaMat = synNet.muZero(2)*ones(numClasses);thetaMat([0:numClasses-1]*numClasses + [1:numClasses]) = 0;thetaMat = thetaMat + diag(ones(1,numClasses)*synNet.muZero(1));
 psiMat = logit_fun(thetaMat);psiVec = reshape(psiMat, [], 1);
-psiVec = psiVec + mvnrnd(zeros(numClasses^2, 1).', vCovMtx0, 1).'; % initialization
-vCovMtx = proc_noise_cov_mtx_gen(numClasses, synNet.gaussEvolCovParamVec(1), synNet.gaussEvolCovParamVec(2));
+psiVec = psiVec + mvnrnd(zeros(numClasses^2, 1).', GammaMat0, 1).'; % initialization
+GammaMat = proc_noise_cov_mtx_gen(numClasses, synNet.gaussEvolCovParamVec(1), synNet.gaussEvolCovParamVec(2));
 c_t = synNet.classMemVecInit; % this is always sorted Ex: 1 .....1 2 ..... 2 3 ....3 ... so on
 classListAll = [1:numClasses];
 thetaArr = zeros(numClasses, numSnapShots);
@@ -38,7 +38,7 @@ classLabelTemplate = repelem([1:numClasses].', classSizes, 1);
 
 for indSnapShot = 1:numSnapShots
     % generate correlated Gaussian vector
-    v = mvnrnd(zeros(numClasses^2, 1), vCovMtx, 1).';
+    v = mvnrnd(zeros(numClasses^2, 1), GammaMat, 1).';
     %vArr = [vArr v];
     
     % Gaussian Random Walk
@@ -86,6 +86,6 @@ end
 %dbg.thetaArr = sigmoid_fun(-[psiVec psiVec_t]);
 %figure;plot(psiVec_t.');
 
-dbg.vCovMtx = vCovMtx;
-dbg.vCovMtx0 = vCovMtx0;
+dbg.GammaMat = GammaMat;
+dbg.GammaMat0 = GammaMat0;
 
