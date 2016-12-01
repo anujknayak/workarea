@@ -3,6 +3,7 @@ function [c_0] = spectral_clustering(W, K)
 
 % number of dominant singular values - consider moving this choice to the
 % top level - parameterize this [TODO]
+% number of dominant singular values
 k = size(W, 1)/4;
 
 % singular value decompositioins

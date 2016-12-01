@@ -1,4 +1,4 @@
-function [psiEst_tAll, c_tHatAll] = get_aposteriori_blkmodel(W, numClasses, Params)
+function [psiEst_tAll, c_tHatAll, yVecAll] = get_aposteriori_blkmodel(W, numClasses, Params)
 
 % % >>>> FOR DEBUG BEGIN <<<<
 % numSnapShots = 200;
@@ -11,43 +11,41 @@ function [psiEst_tAll, c_tHatAll] = get_aposteriori_blkmodel(W, numClasses, Para
 % Params.muZero = synNet.muZero;
 % % >>>> FOR DEBUG END <<<<
 
-maxIter = 50;
+maxIter = 30;
 numSnapShots = size(W, 3);
-
-classListAll = [1:numClasses];
 numNodes = size(W, 1);
 
 % initialize class membership - spectral clustering
 [c_0] = spectral_clustering(W(:,:,1), numClasses);
 % compute block densities Y^t
 [yVec, m_abVec, n_abVec] = get_observation_vec_aposteriori(W(:,:,1), c_0, numClasses);
-yVecRef2 = yVec;
 
 % compute EKF equations
 FMat = eye(numClasses^2);
-ekfParams.GammaMat = Params.GammaMat;
-ekfParams.GammaMatZero = Params.GammaMat0;
-ekfParams.muZeroVals = Params.muZero;
+ekfParams.GammaMat = Params.GammaMat; % consider estimating this hyperparameter
 
-% computing muZeroVec - consider determine this hyperparameter [TODO]
-muZeroVals = ekfParams.muZeroVals;muZeroMat = muZeroVals(2)*ones(numClasses); muZeroMat([1:numClasses:numClasses^2]+[0:1:numClasses-1]) = muZeroVals(1)*ones(1,numClasses);
-muZeroVec = reshape(muZeroMat, [], 1);
-psiEst_t = mvnrnd(muZeroVec, ekfParams.GammaMat, 1).';
-REst_t = FMat*ekfParams.GammaMatZero*FMat.' + ekfParams.GammaMat;
+% computing init hyperparameters
+% estimating muZero
+muZeroVec = sigmoid_fun(yVec);
+psiEst_t = muZeroVec;
+% estimating Gamma0
+sig_abSq = yVec.*(1-yVec)./n_abVec;SigMat = diag(sig_abSq);
+GMat = diag(1./yVec + 1./(1-yVec));
+GammaMatZeroInit = GMat*SigMat*GMat.';
+REst_t = FMat*GammaMatZeroInit*FMat.' + ekfParams.GammaMat;
+
+% initialization for local search (hill climbing) algorithm
 c_tHat = c_0;
 psiEst_tAll = zeros(numClasses^2, numSnapShots);
 c_tHatAll = zeros(numNodes, numSnapShots);
 yVecAll = zeros(numClasses^2, numSnapShots);
 
+% enumerating class membership vector copies - to avoid confusion
+% c_tTilda - class membership trial for each iteration
+% c_tBar - class membership updated for each hypothesis (node-class membership) when positive gradient (uphill) is encountered
+% c_tHat - the best class membership after current iteration - it is also the best final class membership vector
 
 for indSnapShot = 1:numSnapShots
-    % >>>> FOR DEBUG BEGIN
-%     if indSnapShot < 5
-%         maxIter = 10;
-%     else
-%         maxIter = 1;
-%     end
-%     % >>>> FOR DEBUG END
     
     fprintf('snapshot %d\n',indSnapShot);
     [yVec, m_abVec, n_abVec] = get_observation_vec_aposteriori(W(:,:,indSnapShot), c_tHat, numClasses);

@@ -5,7 +5,7 @@
 % outputs: stateEst: estimated state
 %
 function [psiEst_t, yVec] = extended_kalman_filt_apriori_blkmodel(yVec, n_abVec, F, classLabelList, numClasses, ekfParams)
-% %dbstop if warning
+%dbstop if warning
 % % >>>> for debug begin <<<<
 % numSnapShots = 1e3;
 % [synNet] = synthetic_blkmodel_gen_params_init();
@@ -27,23 +27,23 @@ function [psiEst_t, yVec] = extended_kalman_filt_apriori_blkmodel(yVec, n_abVec,
 numSnapShots = size(yVec, 2);
 
 % Initialization
+% Consider estimating the hyperparameter GammaMat
 GammaMat = ekfParams.GammaMat;
-% consider determining the hyperparameter - muZero
-muZeroVals = ekfParams.muZeroVals;
-muZeroMat = muZeroVals(2)*ones(numClasses); muZeroMat([1:numClasses:numClasses^2]+[0:1:numClasses-1]) = muZeroVals(1)*ones(1,numClasses);
-muZeroVec = reshape(muZeroMat, [], 1);
-psiEst = mvnrnd(muZeroVec, GammaMat, 1).';
 psiEst_t = zeros(numClasses^2, numSnapShots);
-% Initializing covariance estimate
-REstTmp = zeros(numClasses^2);
-for indSnapShot = 1:numSnapShots
-    REstTmp = REstTmp + yVec(:, indSnapShot)*yVec(:, indSnapShot).';
-end
-REst = REstTmp/numSnapShots;
+% computing init hyperparameters
+FMat = eye(numClasses^2);
+% estimating muZero
+muZeroVec = sigmoid_fun(yVec(:, 1));
+psiEst = muZeroVec;
+% estimating Gamma0
+sig_abSq = yVec(:, 1).*(1-yVec(:,1))./n_abVec(:,1);SigMat = diag(sig_abSq);
+GMat = diag(1./yVec(:,1) + 1./(1-yVec(:,1)));
+GammaMatZeroInit = GMat*SigMat*GMat.';
+REst = FMat*GammaMatZeroInit*FMat.' + ekfParams.GammaMat;
 
 % Kalman filter loop
 for indSnapShot = 1:numSnapShots
-    disp(indSnapShot);
+    %disp(indSnapShot);
     % Sigma matrix - observation noise variance computation
     sig_abSq = yVec(:, indSnapShot).*(1-yVec(:, indSnapShot))./n_abVec(:, indSnapShot);
     SigMat = diag(sig_abSq);

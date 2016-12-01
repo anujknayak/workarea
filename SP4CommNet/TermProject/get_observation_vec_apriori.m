@@ -38,5 +38,7 @@ end
 m_abVec = reshape(m_abMat, numClasses^2, []);
 n_abVec = reshape(n_abMat, numClasses^2, []);
 yVec = reshape(yMat, numClasses^2, []);
+yVec(isnan(yVec) | (yVec == inf)) = 0.5/numClasses^2;
+yVec(yVec == 0) = 0.5/numClasses^2;
 
 

@@ -2,7 +2,7 @@
 %       : classLabelList - list of class labels for each snapshot in time
 %       : classSizesList - list of class sizes corresponding to the labels
 % outputs: psiEst_t: logit of edge probabilities
-function [psiEst_t, yVec] = get_apriori_blkmodel(W, classLabelList, numClasses, Params)
+function [psiEst_t, yVecEst, yVec] = get_apriori_blkmodel(W, classLabelList, numClasses, Params)
 
 % % >>>> for debug begin <<<<
 % numSnapShots = 1e2;
@@ -18,9 +18,7 @@ function [psiEst_t, yVec] = get_apriori_blkmodel(W, classLabelList, numClasses, 
 
 FMat = eye(numClasses^2);
 ekfParams.GammaMat = Params.GammaMat;
-ekfParams.GammaMatZero = Params.GammaMat0;
-ekfParams.muZeroVals = Params.muZero;
-[psiEst_t, yVec] = extended_kalman_filt_apriori_blkmodel(yVec, n_abVec, FMat, classLabelList, numClasses, ekfParams);
+[psiEst_t, yVecEst] = extended_kalman_filt_apriori_blkmodel(yVec, n_abVec, FMat, classLabelList, numClasses, ekfParams);
 
 
 
