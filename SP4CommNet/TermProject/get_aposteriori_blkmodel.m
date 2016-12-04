@@ -99,7 +99,6 @@ for indSnapShot = 1:numSnapShots
             pt = ptBar;
             psiEst_t = psiEst_tBar;
             c_tHat = c_tBar;
-            %fprintf('\t got a better solution\n');
         else % Reached local maximum
             disp(iterLoop);
             break;
