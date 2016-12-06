@@ -54,7 +54,7 @@ for indSnapShot = 1:numSnapShots
     sig_abSq = yVec.*(1-yVec)./n_abVec;
     SigMat = diag(sig_abSq);
     % Extended Kalman Filter
-    [psiEst_t, REst_t, psiEst_tMinus1, REst_tMinus1] = extended_kalman_filter(yVec, psiEst_t, FMat, REst_t, ekfParams.GammaMat, SigMat);
+    [psiEst_t, REst_t, psiEst_tMinus1, REst_tMinus1] = extended_kalman_filter(yVec, psiEst_t, FMat, REst_t, ekfParams.GammaMat, SigMat); % n_abVec);
     % compute log posterior
     [pt] = posterior_prob_compute(m_abVec, n_abVec, psiEst_t, psiEst_tMinus1, REst_tMinus1);
     
@@ -74,11 +74,11 @@ for indSnapShot = 1:numSnapShots
                     % compute block densities
                     [yVec, m_abVec, n_abVec] = get_observation_vec_aposteriori(W(:,:,indSnapShot), c_tTilda, numClasses);
                     % EKF equations
-                    % Sigma matrix - observation noise variance computation
+					% Sigma matrix - observation noise variance computation
                     sig_abSq = yVec.*(1-yVec)./n_abVec;
                     SigMat = diag(sig_abSq);
                     % Extended Kalman Filter
-                    [psiEst_tTilda, REst_tTilda, psiEst_tMinus1, REst_tMinus1] = extended_kalman_filter(yVec, psiEst_t, FMat, REst_t, ekfParams.GammaMat, SigMat);
+                    [psiEst_tTilda, REst_tTilda, psiEst_tMinus1, REst_tMinus1] = extended_kalman_filter(yVec, psiEst_t, FMat, REst_t, ekfParams.GammaMat, SigMat); %n_abVec);
                     % compute posterior probability
                     [ptTilda] = posterior_prob_compute(m_abVec, n_abVec, psiEst_tTilda, psiEst_tMinus1, REst_tMinus1);
                     %ptArr = [ptArr ptTilda];

@@ -1,5 +1,6 @@
 % load MIT reality data
 % MIT reality mining data - preprocessing
+% This script takes about 30 minutes to complete the task
 
 % select valid persons
 filCnt = 1;
@@ -8,6 +9,7 @@ for filInd = 1:length(s)
         continue;
     else
         sFil(filCnt) = s(filInd);
+        classLabelStr{filCnt} = s(filInd).my_affil;
         filCnt = filCnt + 1;
     end
 end
@@ -29,7 +31,7 @@ end
 % loop for all scans
 % determine week number for the particular scan
 % update in week structure
-%
+
 weekStruct = [];
 idxCntMat = [];
 

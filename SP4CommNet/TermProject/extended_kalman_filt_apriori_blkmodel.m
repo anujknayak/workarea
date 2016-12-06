@@ -56,12 +56,14 @@ for indSnapShot = 1:numSnapShots
             minVarVal = 1e-2;
             if sum(sig_abSq < minVarVal) > 0
                 sig_abSq(sig_abSq < minVarVal) = minVarVal;
+                sig_abSq(sig_abSq == inf) = minVarVal;
                 SigMat = diag(sig_abSq);
             end
         end
     end
     
     % Kalman filter equations
+    %[psiEst, REst, psiEstMinus1, REst_tMinus1] = extended_kalman_filter(yVec(:, indSnapShot), psiEst, F, REst, GammaMat, n_abVec(:, indSnapShot));
     [psiEst, REst, psiEstMinus1, REst_tMinus1] = extended_kalman_filter(yVec(:, indSnapShot), psiEst, F, REst, GammaMat, SigMat);
     psiEst_t(:, indSnapShot) = psiEst;
     psiEst_tMinus1(:, indSnapShot) = psiEstMinus1;

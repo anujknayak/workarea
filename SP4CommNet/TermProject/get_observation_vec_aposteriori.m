@@ -34,6 +34,11 @@ for indSnapShot = 1:numSnapShots
             n_abMat(indClassRow, indClassCol, indSnapShot) = n_abMatCurrent;
             % compute the block density
             yMatValCurrent = m_abMat(indClassRow, indClassCol, indSnapShot)/n_abMat(indClassRow, indClassCol, indSnapShot);
+            % imposing the constraint - there is at least one edge
+            if m_abMat(indClassRow, indClassCol, indSnapShot) == 0
+				% overriding by fixed value 1e-4
+                yMatValCurrent = 1e-4;
+            end
             if (isnan(yMatValCurrent) || (yMatValCurrent == -inf) || (yMatValCurrent == inf)) && indSnapShot >1
                 yMatValCurrent = yMat(indClassRow, indClassCol, indSnapShot-1)*0.01;
             elseif (isnan(yMatValCurrent) || (yMatValCurrent == -inf) || (yMatValCurrent == inf)) && indSnapShot == 1

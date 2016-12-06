@@ -39,10 +39,27 @@ REst = REstTmp/numSnapShots;
 
 % Kalman filter loop
 % Sigma matrix - observation noise variance computation
-sig_abSq = yVec(:, indSnapShot).*(1-yVec(:, indSnapShot))./n_abVec;
-SigMat = diag(sig_abSq);
+if ekfParams.simNetwork == 1
+    % for synthetic network
+    sig_abSq = yVec(:, indSnapShot).*(1-yVec(:, indSnapShot))./n_abVec(:, indSnapShot);
+    SigMat = diag(sig_abSq);
+else
+    % real network to address the issue of the absence of edges and the
+    % consequence of ill-conditioned matrix
+    if indSnapShot == 1
+        sig_abSq = yVec(:, indSnapShot).*(1-yVec(:, indSnapShot))./n_abVec(:, indSnapShot);
+        % mention this in the report - notifiable change
+        minVarVal = 1e-2;
+        if sum(sig_abSq < minVarVal) > 0
+            sig_abSq(sig_abSq < minVarVal) = minVarVal;
+            sig_abSq(sig_abSq == inf) = minVarVal;
+            SigMat = diag(sig_abSq);
+        end
+    end
+end
+
 % Kalman filter equations
-[psiEst, REst] = extended_kalman_filter(yVec, psiEst, F, REst, GammaMat, SigMat);
+[psiEst, REst] = extended_kalman_filter(yVec, psiEst, F, REst, GammaMat, SigMat); %n_abVec(:, indSnapShot));
 psiEst_t = psiEst; %
 
 
